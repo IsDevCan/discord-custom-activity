@@ -1,0 +1,22 @@
+[
+  {"name": "VALORANT", "id": "811469787657928704", "details": "Competitive", "state": "In Match (11 - 9)"},
+  {"name": "Fortnite", "id": "432980957394370572", "details": "Battle Royale", "state": "Victory Royale! #1/100"},
+  {"name": "Apex Legends", "id": "542075586886107149", "details": "Ranked Leagues", "state": "In Match - 4 Squads Left"},
+  {"name": "Rocket League", "id": "356877880938070016", "details": "Competitive 3v3", "state": "In Overtime (2 - 2)"},
+  {"name": "Overwatch", "id": "356875221078245376", "details": "Competitive", "state": "Escorting Payload"},
+  {"name": "Rainbow Six Siege", "id": "356876590342340608", "details": "Ranked Bomb", "state": "Match Point (4 - 4)"},
+  {"name": "Minecraft", "id": "432980957394370572", "details": "Survival Mode", "state": "Exploring Caves"},
+  {"name": "Roblox", "id": "363445589247131668", "details": "Playing with Friends", "state": "In Server"},
+  {"name": "Grand Theft Auto V", "id": "356869127241072640", "details": "GTA Online", "state": "Running Heist"},
+  {"name": "Elden Ring", "id": "946950247785848882", "details": "The Lands Between", "state": "Exploring Altus Plateau"},
+  {"name": "Cyberpunk 2077", "id": "787033502848122880", "details": "Night City", "state": "Exploring Watson"},
+  {"name": "Red Dead Redemption 2", "id": "639144865007992832", "details": "Story Mode", "state": "Exploring Saint Denis"},
+  {"name": "Baldur's Gate 3", "id": "1140026850428518400", "details": "Act 3", "state": "Exploring Lower City"},
+  {"name": "Subnautica", "id": "356953046200221696", "details": "Survival", "state": "Exploring Deep Reef"},
+  {"name": "Rust", "id": "356889240837160960", "details": "Vanilla Server", "state": "Roaming with Clan"},
+  {"name": "Terraria", "id": "356952771078914048", "details": "Expert Mode", "state": "Mining in Caverns"},
+  {"name": "Stardew Valley", "id": "359509387670192128", "details": "Spring, Year 2", "state": "Watering Crops"},
+  {"name": "Fall Guys", "id": "742897755160313986", "details": "Main Show", "state": "Final Round"},
+  {"name": "Among Us", "id": "754796366036172901", "details": "Classic Mode", "state": "Tasks in Electrical"},
+  {"name": "Hollow Knight", "id": "363431029484027904", "details": "City of Tears", "state": "Exploring Map"}
+]
