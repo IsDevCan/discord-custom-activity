@@ -2,7 +2,7 @@
 """
 Discord Custom Activity & Rich Presence Manager - Visual Dashboard
 Created by IsDevCan
-Zero-dependency visual UI with Drag & Drop custom image support and built-in official game logos.
+Zero-dependency visual UI with Meme/Unreleased game presets, Drag & Drop custom image support, and built-in logos.
 """
 
 import os
@@ -52,6 +52,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       --primary-hover: #4752c4;
       --accent-green: #23a55a;
       --accent-red: #f23f43;
+      --accent-gold: #f1c40f;
+      --accent-purple: #9b59b6;
       --text: #f2f3f5;
       --text-muted: #949ba4;
     }
@@ -66,7 +68,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     }
     .container {
       width: 100%;
-      max-width: 680px;
+      max-width: 700px;
     }
     .header {
       text-align: center;
@@ -90,6 +92,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       border-radius: 20px;
       font-weight: 700;
       color: white;
+    }
+    .badge-meme {
+      background: linear-gradient(135deg, #ff007f, #7928ca);
+      box-shadow: 0 0 10px rgba(255, 0, 127, 0.4);
     }
     .subtitle {
       color: var(--text-muted);
@@ -156,6 +162,41 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     input[type="text"]:focus, select:focus {
       border-color: var(--primary);
     }
+    optgroup {
+      font-weight: 800;
+      background: #141720;
+      color: #7289da;
+    }
+    option {
+      font-weight: 400;
+      background: var(--input-bg);
+      color: var(--text);
+    }
+    .preset-row {
+      display: flex;
+      gap: 10px;
+    }
+    .preset-row select {
+      flex: 1;
+    }
+    .btn-dice {
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      color: var(--accent-gold);
+      padding: 0 16px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .btn-dice:hover {
+      background: rgba(241, 196, 15, 0.15);
+      border-color: var(--accent-gold);
+    }
     .row {
       display: flex;
       gap: 12px;
@@ -168,7 +209,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       border: 2px dashed var(--border);
       background: var(--input-bg);
       border-radius: 10px;
-      padding: 20px;
+      padding: 18px;
       text-align: center;
       cursor: pointer;
       transition: all 0.2s ease;
@@ -177,16 +218,16 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     }
     .drop-zone.dragover {
       border-color: var(--primary);
-      background: rgba(88, 101, 242, 0.1);
+      background: rgba(88, 101, 242, 0.12);
     }
     .drop-zone-content {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
     .drop-icon {
-      font-size: 28px;
+      font-size: 26px;
     }
     .drop-text {
       font-size: 13px;
@@ -266,7 +307,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       background: #111214;
       border: 1px solid #232428;
       border-radius: 10px;
-      padding: 16px;
+      padding: 18px;
       display: flex;
       gap: 16px;
       align-items: flex-start;
@@ -274,34 +315,35 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     }
     .discord-logo-container {
       position: relative;
-      width: 68px;
-      height: 68px;
+      width: 72px;
+      height: 72px;
       flex-shrink: 0;
     }
     .discord-game-logo {
       width: 100%;
       height: 100%;
-      border-radius: 10px;
+      border-radius: 12px;
       object-fit: cover;
       background: #1e1f22;
       display: flex;
       align-items: center;
       justify-content: center;
       border: 1px solid #2b2d31;
+      overflow: hidden;
     }
     .discord-badge-icon {
       position: absolute;
       bottom: -4px;
       right: -4px;
-      width: 22px;
-      height: 22px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
       background: #2b2d31;
       border: 2px solid #111214;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 11px;
+      font-size: 12px;
     }
     .discord-info h4 {
       font-size: 12px;
@@ -309,23 +351,23 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       color: #b5bac1;
       letter-spacing: 0.5px;
       text-transform: uppercase;
-      margin-bottom: 3px;
+      margin-bottom: 4px;
     }
     .discord-title {
-      font-size: 15px;
+      font-size: 16px;
       font-weight: 700;
       color: #f2f3f5;
-      margin-bottom: 2px;
+      margin-bottom: 3px;
     }
     .discord-details {
       font-size: 13px;
       color: #dbdee1;
-      margin-bottom: 2px;
+      margin-bottom: 3px;
     }
     .discord-state {
       font-size: 13px;
       color: #949ba4;
-      margin-bottom: 4px;
+      margin-bottom: 5px;
     }
     .discord-time {
       font-size: 12px;
@@ -346,47 +388,66 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <body>
   <div class="container">
     <div class="header">
-      <h1>🎮 Discord Custom Activity <span class="badge">Visual UI</span></h1>
-      <p class="subtitle">Set custom games, logos, live timers & status on your Discord with zero terminal commands!</p>
+      <h1>🎮 Discord Custom Activity <span class="badge badge-meme">Meme Edition</span></h1>
+      <p class="subtitle">Flex unreleased games like GTA 6, Silksong, Half-Life 3, or drop any custom meme image on your Discord!</p>
     </div>
 
     <div class="card">
       <div class="card-title">
-        <span>Activity Settings</span>
+        <span>Activity Controls</span>
         <div id="statusBadge" class="status-badge">
           <span class="status-dot"></span>
           <span id="statusText">Not Running</span>
         </div>
       </div>
 
-      <!-- Preset Selector -->
+      <!-- Presets & Random Meme Dice -->
       <div class="form-group">
-        <label>⚡ Quick Game Preset with Official Logo</label>
-        <select id="presetSelect" onchange="applyPreset()">
-          <option value="">-- Choose a Game Preset or Custom --</option>
-          <option value="valorant">VALORANT</option>
-          <option value="fortnite">Fortnite</option>
-          <option value="minecraft">Minecraft</option>
-          <option value="roblox">Roblox</option>
-          <option value="gta5">Grand Theft Auto V</option>
-          <option value="cs2">Counter-Strike 2</option>
-          <option value="rocket_league">Rocket League</option>
-          <option value="apex">Apex Legends</option>
-          <option value="overwatch">Overwatch 2</option>
-          <option value="r6">Rainbow Six Siege</option>
-          <option value="elden_ring">Elden Ring</option>
-          <option value="lol">League of Legends</option>
-        </select>
+        <label>⚡ Game Preset / Troll Games</label>
+        <div class="preset-row">
+          <select id="presetSelect" onchange="applyPreset()">
+            <option value="">-- Pick a Game or Custom --</option>
+            <optgroup label="🔥 TROLL & UNRELEASED GAMES (MEME VAULT)">
+              <option value="gta6">Grand Theft Auto VI (Early Dev Build)</option>
+              <option value="silksong">Hollow Knight: Silksong</option>
+              <option value="halflife3">Half-Life 3 (Valve Beta)</option>
+              <option value="bloodborne_pc">Bloodborne PC Remaster</option>
+              <option value="portal3">Portal 3</option>
+              <option value="tes6">The Elder Scrolls VI: Hammerfell</option>
+              <option value="titanfall3">Titanfall 3</option>
+              <option value="minecraft2">Minecraft 2 (Unreal Engine 5)</option>
+              <option value="chess2">Chess 2: Battle Royale</option>
+              <option value="touching_grass">Touching Grass Simulator 2026</option>
+              <option value="nitro_generator">Free Discord Nitro Generator 3D</option>
+              <option value="skate4">Skate 4</option>
+            </optgroup>
+            <optgroup label="🎮 POPULAR ESPORTS & GAMES">
+              <option value="valorant">VALORANT</option>
+              <option value="fortnite">Fortnite</option>
+              <option value="minecraft">Minecraft</option>
+              <option value="roblox">Roblox</option>
+              <option value="gta5">Grand Theft Auto V</option>
+              <option value="cs2">Counter-Strike 2</option>
+              <option value="rocket_league">Rocket League</option>
+              <option value="apex">Apex Legends</option>
+              <option value="overwatch">Overwatch 2</option>
+              <option value="r6">Rainbow Six Siege</option>
+              <option value="elden_ring">Elden Ring</option>
+              <option value="lol">League of Legends</option>
+            </optgroup>
+          </select>
+          <button class="btn-dice" onclick="pickRandomMeme()" title="Pick a random troll game!">🎲 Random Troll</button>
+        </div>
       </div>
 
       <!-- Drag and Drop Image Box -->
       <div class="form-group">
-        <label>🖼️ Custom Game Logo / Icon (Drop any PNG or Image!)</label>
+        <label>🖼️ Custom Game Logo / Icon (Drop any PNG, Meme or Picture!)</label>
         <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
           <input type="file" id="fileInput" accept="image/png, image/jpeg, image/webp, image/gif, image/svg+xml" style="display: none;" onchange="handleFileSelect(event)">
           <div class="drop-zone-content">
             <span class="drop-icon">📁</span>
-            <span class="drop-text">Drag & Drop any PNG, JPG, or icon image here</span>
+            <span class="drop-text">Drag & Drop any PNG, JPG, or Meme image here</span>
             <span class="drop-subtext">or click to browse from your computer</span>
           </div>
         </div>
@@ -405,23 +466,23 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       <div class="row">
         <div class="form-group">
           <label>Details (Line 1)</label>
-          <input type="text" id="gameDetails" placeholder="e.g. Competitive, Heist Mission">
+          <input type="text" id="gameDetails" placeholder="e.g. Playing Early Access Dev Build">
         </div>
         <div class="form-group">
           <label>State (Line 2)</label>
-          <input type="text" id="gameState" placeholder="e.g. In Match (13 - 11), Solo Queue">
+          <input type="text" id="gameState" placeholder="e.g. Vice City Heist (Mission 42)">
         </div>
       </div>
 
       <label class="checkbox-group">
         <input type="checkbox" id="showTimer" checked>
-        <span>Show live elapsed timer on Discord</span>
+        <span>Show live elapsed timer on Discord profile</span>
       </label>
 
       <div class="row">
         <div class="form-group">
-          <label>Profile Button Label (Optional)</label>
-          <input type="text" id="btn1Text" placeholder="e.g. My Twitch Stream, GitHub">
+          <label>Clickable Button Label (Optional)</label>
+          <input type="text" id="btn1Text" placeholder="e.g. Download Leak, My Twitch">
         </div>
         <div class="form-group">
           <label>Button Link URL</label>
@@ -441,16 +502,16 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       <div class="discord-profile-card">
         <div class="discord-logo-container">
           <div id="logoSlot" class="discord-game-logo">
-            <span id="fallbackEmoji" style="font-size: 32px;">🎮</span>
+            <span id="fallbackEmoji" style="font-size: 36px;">🎮</span>
           </div>
           <div class="discord-badge-icon">⚡</div>
         </div>
         <div class="discord-info">
           <h4>PLAYING A GAME</h4>
           <div class="discord-title" id="previewTitle">Grand Theft Auto VI</div>
-          <div class="discord-details" id="previewDetails">Heist Mission</div>
-          <div class="discord-state" id="previewState">5 Stars</div>
-          <div class="discord-time" id="previewTime">⏳ 00:24:10 elapsed</div>
+          <div class="discord-details" id="previewDetails">Playing Early Access Dev Build</div>
+          <div class="discord-state" id="previewState">Vice City Heist (Mission 42)</div>
+          <div class="discord-time" id="previewTime">⏳ 01:42:15 elapsed</div>
         </div>
       </div>
     </div>
@@ -461,8 +522,23 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   </div>
 
   <script>
-    // Built-in crisp SVG logos for popular games
+    // Crisp SVG logos including custom Meme & Unreleased Games
     const GAME_SVGS = {
+      // --- TROLL & UNRELEASED ---
+      gta6: `<svg viewBox="0 0 100 100" width="100%" height="100%"><defs><linearGradient id="gta6grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff2a8d"/><stop offset="50%" stop-color="#9a00ff"/><stop offset="100%" stop-color="#00f0ff"/></linearGradient></defs><rect width="100" height="100" rx="12" fill="#090514"/><path d="M15 75 C 20 60, 30 50, 45 45 C 35 48, 25 55, 18 68 Z" fill="#ff2a8d" opacity="0.6"/><path d="M85 75 C 80 60, 70 50, 55 45 C 65 48, 75 55, 82 68 Z" fill="#00f0ff" opacity="0.6"/><text x="50" y="66" font-size="44" font-weight="900" fill="url(#gta6grad)" text-anchor="middle" font-family="Arial Black, Impact" letter-spacing="-2">VI</text><text x="50" y="85" font-size="8" font-weight="900" fill="#ffffff" text-anchor="middle" font-family="Arial Black" letter-spacing="1">VICE CITY</text></svg>`,
+      silksong: `<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" rx="12" fill="#140204"/><polygon points="50,10 56,50 50,90 44,50" fill="#ffffff"/><circle cx="50" cy="50" r="14" fill="#a71920"/><circle cx="47" cy="48" r="3" fill="#ffffff"/><circle cx="53" cy="48" r="3" fill="#ffffff"/><polygon points="50,2 53,20 47,20" fill="#d9d9d9"/><text x="50" y="94" font-size="7" font-weight="800" fill="#e54b4b" text-anchor="middle" font-family="Georgia">SILKSONG</text></svg>`,
+      halflife3: `<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" rx="12" fill="#1b1c20"/><circle cx="50" cy="50" r="40" stroke="#f68b1f" stroke-width="7" fill="none"/><text x="44" y="68" font-size="48" font-weight="900" fill="#f68b1f" text-anchor="middle" font-family="Georgia, serif">λ</text><text x="70" y="44" font-size="28" font-weight="900" fill="#f68b1f" text-anchor="middle" font-family="Impact">3</text></svg>`,
+      bloodborne_pc: `<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" rx="12" fill="#08080a"/><line x1="50" y1="15" x2="50" y2="85" stroke="#c0232b" stroke-width="6"/><line x1="30" y1="35" x2="70" y2="35" stroke="#c0232b" stroke-width="5"/><line x1="35" y1="65" x2="65" y2="65" stroke="#c0232b" stroke-width="5"/><path d="M30 35 Q 50 65 70 35" stroke="#c0232b" stroke-width="5" fill="none"/><text x="50" y="94" font-size="7" font-weight="800" fill="#ffffff" text-anchor="middle" font-family="Georgia">PC EDITION</text></svg>`,
+      portal3: `<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" rx="12" fill="#181818"/><ellipse cx="38" cy="50" rx="16" ry="32" fill="none" stroke="#00a2ff" stroke-width="6"/><ellipse cx="62" cy="50" rx="16" ry="32" fill="none" stroke="#ff7700" stroke-width="6"/><text x="50" y="60" font-size="30" font-weight="900" fill="#ffffff" text-anchor="middle" font-family="Impact">3</text></svg>`,
+      tes6: `<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" rx="12" fill="#101014"/><polygon points="50,15 65,40 50,55 35,40" fill="none" stroke="#d4af37" stroke-width="4"/><polygon points="50,55 60,80 50,72 40,80" fill="none" stroke="#d4af37" stroke-width="4"/><text x="50" y="70" font-size="34" font-weight="900" fill="#d4af37" text-anchor="middle" font-family="Cinzel, Georgia">VI</text></svg>`,
+      titanfall3: `<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" rx="12" fill="#1c2024"/><polygon points="25,25 75,25 85,75 50,90 15,75" fill="#2d333b"/><polygon points="30,42 70,42 65,58 35,58" fill="#00d0ff"/><text x="50" y="80" font-size="20" font-weight="900" fill="#ff6b00" text-anchor="middle" font-family="Impact">/// 3</text></svg>`,
+      minecraft2: `<svg viewBox="0 0 100 100" width="100%" height="100%"><defs><linearGradient id="mc2g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#00ffff"/><stop offset="100%" stop-color="#0066ff"/></linearGradient></defs><rect width="100" height="100" rx="12" fill="#0b1329"/><circle cx="50" cy="50" r="38" fill="url(#mc2g)"/><text x="50" y="60" font-size="28" font-weight="900" fill="#ffffff" text-anchor="middle" font-family="Impact">MC 2</text><text x="50" y="76" font-size="7" font-weight="900" fill="#ffe600" text-anchor="middle">UNREAL ENGINE 5</text></svg>`,
+      chess2: `<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" rx="12" fill="#1c1917"/><polygon points="20,75 80,75 75,40 60,55 50,25 40,55 25,40" fill="#eab308"/><circle cx="35" cy="48" r="3" fill="#ff0000"/><circle cx="65" cy="48" r="3" fill="#ff0000"/><text x="50" y="90" font-size="11" font-weight="900" fill="#ffffff" text-anchor="middle" font-family="Arial Black">CHESS II</text></svg>`,
+      touching_grass: `<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" rx="12" fill="#052e16"/><circle cx="80" cy="25" r="16" fill="#facc15"/><path d="M20 90 Q 25 35 45 40 Q 35 60 30 90" fill="#22c55e"/><path d="M40 90 Q 50 20 70 30 Q 55 55 50 90" fill="#4ade80"/><path d="M60 90 Q 70 35 85 45 Q 75 65 70 90" fill="#16a34a"/><text x="50" y="93" font-size="8" font-weight="800" fill="#ffffff" text-anchor="middle">TOUCH GRASS</text></svg>`,
+      nitro_generator: `<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" rx="12" fill="#5865F2"/><text x="50" y="52" font-size="38" font-weight="900" fill="#ffffff" text-anchor="middle">$</text><text x="50" y="78" font-size="14" font-weight="900" fill="#f1c40f" text-anchor="middle">FREE NITRO</text></svg>`,
+      skate4: `<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" rx="12" fill="#e5e5e5"/><rect x="15" y="42" width="70" height="16" rx="8" fill="#111111"/><circle cx="28" cy="62" r="7" fill="#ea580c"/><circle cx="72" cy="62" r="7" fill="#ea580c"/><text x="50" y="34" font-size="18" font-weight="900" fill="#111111" text-anchor="middle" font-family="Arial Black">skate.</text></svg>`,
+
+      // --- POPULAR ESPORTS ---
       valorant: `<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" rx="10" fill="#0f1923"/><polygon points="20,25 45,25 35,75 10,75" fill="#ff4655"/><polygon points="55,25 90,25 80,45 65,45" fill="#ff4655"/><polygon points="62,55 77,55 69,75 54,75" fill="#ff4655"/></svg>`,
       minecraft: `<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" rx="10" fill="#583822"/><rect width="100" height="40" fill="#528e35" rx="10"/><rect y="25" width="100" height="20" fill="#528e35"/><rect x="15" y="40" width="15" height="15" fill="#528e35"/><rect x="45" y="40" width="15" height="20" fill="#528e35"/><rect x="75" y="40" width="15" height="15" fill="#528e35"/></svg>`,
       fortnite: `<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" rx="10" fill="#1b1c28"/><path d="M35 15 L75 15 L70 32 L52 32 L49 45 L68 45 L64 62 L45 62 L39 88 L20 88 Z" fill="#ffffff"/></svg>`,
@@ -478,6 +554,21 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     };
 
     const presets = {
+      // Meme / Unreleased
+      gta6: { name: "Grand Theft Auto VI", details: "Playing Early Access Dev Build", state: "Vice City Heist (Mission 42)" },
+      silksong: { name: "Hollow Knight: Silksong", details: "Pharloom Citadel (100% Run)", state: "Waiting Since 2019" },
+      halflife3: { name: "Half-Life 3", details: "Valve Internal Beta v0.9", state: "Chapter 7: Return to Borealis" },
+      bloodborne_pc: { name: "Bloodborne PC Remaster", details: "4K 120FPS (Finally on PC)", state: "Father Gascoigne (Attempt 1)" },
+      portal3: { name: "Portal 3", details: "Aperture Science Testing", state: "Chamber 47 - Still No Cake" },
+      tes6: { name: "The Elder Scrolls VI: Hammerfell", details: "Bethesda Early Playtest", state: "Exploring High Rock" },
+      titanfall3: { name: "Titanfall 3", details: "Multiplayer Pilot Match", state: "Taking Normal Pills (Delusion Level 100)" },
+      minecraft2: { name: "Minecraft 2 (Unreal Engine 5)", details: "Spherical World Mode", state: "Herobrine Encounter" },
+      chess2: { name: "Chess 2: Battle Royale", details: "Ranked 100-Player Gulag", state: "Pawns Got Nerfed" },
+      touching_grass: { name: "Touching Grass Simulator 2026", details: "Tutorial: Leaving My Room", state: "Sunlight Burning My Eyes" },
+      nitro_generator: { name: "Free Discord Nitro Generator 3D", details: "Mining Free Nitro Coins", state: "100% Legit No Virus" },
+      skate4: { name: "Skate 4", details: "Closed Developer Playtest", state: "Doing 900 Kickflips at San Van" },
+
+      // Popular
       valorant: { name: "VALORANT", details: "Competitive", state: "In Match (13 - 11)" },
       fortnite: { name: "Fortnite", details: "Battle Royale", state: "Victory Royale! #1/100" },
       minecraft: { name: "Minecraft", details: "Survival Mode", state: "Exploring Nether" },
@@ -491,6 +582,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       elden_ring: { name: "Elden Ring", details: "The Lands Between", state: "Altus Plateau" },
       lol: { name: "League of Legends", details: "Ranked Solo", state: "Mid Lane (5/0/2)" }
     };
+
+    const MEME_KEYS = ["gta6", "silksong", "halflife3", "bloodborne_pc", "portal3", "tes6", "titanfall3", "minecraft2", "chess2", "touching_grass", "nitro_generator", "skate4"];
 
     let currentCustomImage = null;
 
@@ -507,18 +600,24 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       }
     }
 
+    function pickRandomMeme() {
+      const randKey = MEME_KEYS[Math.floor(Math.random() * MEME_KEYS.length)];
+      document.getElementById("presetSelect").value = randKey;
+      applyPreset();
+    }
+
     function setLogoSvg(key) {
       const slot = document.getElementById("logoSlot");
       if (GAME_SVGS[key]) {
         slot.innerHTML = GAME_SVGS[key];
       } else {
-        slot.innerHTML = `<span style="font-size: 32px;">🎮</span>`;
+        slot.innerHTML = `<span style="font-size: 36px;">🎮</span>`;
       }
     }
 
     function setLogoImage(src) {
       const slot = document.getElementById("logoSlot");
-      slot.innerHTML = `<img src="${src}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;" alt="Logo">`;
+      slot.innerHTML = `<img src="${src}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" alt="Logo">`;
     }
 
     // Drag & Drop Handling
@@ -585,14 +684,14 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       if (presetKey && GAME_SVGS[presetKey]) {
         setLogoSvg(presetKey);
       } else {
-        document.getElementById("logoSlot").innerHTML = `<span style="font-size: 32px;">🎮</span>`;
+        document.getElementById("logoSlot").innerHTML = `<span style="font-size: 36px;">🎮</span>`;
       }
     }
 
     function updatePreview() {
       const name = document.getElementById("gameName").value || "Grand Theft Auto VI";
-      const details = document.getElementById("gameDetails").value || "Heist Mission";
-      const state = document.getElementById("gameState").value || "5 Stars";
+      const details = document.getElementById("gameDetails").value || "Playing Early Access Dev Build";
+      const state = document.getElementById("gameState").value || "Vice City Heist (Mission 42)";
       document.getElementById("previewTitle").innerText = name;
       document.getElementById("previewDetails").innerText = details;
       document.getElementById("previewState").innerText = state;
@@ -651,9 +750,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       }
     }
 
-    // Initialize default view
-    setLogoSvg("gta5");
-    updatePreview();
+    // Default to GTA 6 on first load!
+    document.getElementById("presetSelect").value = "gta6";
+    applyPreset();
   </script>
 </body>
 </html>
@@ -727,7 +826,7 @@ class WebHandler(BaseHTTPRequestHandler):
             buttons = body.get("buttons", [])
             custom_image = body.get("custom_image")
 
-            # Match client ID or fallback to standard presence
+            # Fallback client ID
             client_id = "811469787657928704"
             assets = {}
             for k, p in PRESETS.items():
@@ -811,7 +910,7 @@ def main():
     threading.Thread(target=start_heartbeat, daemon=True).start()
 
     print("=" * 60)
-    print("🎮 DISCORD CUSTOM ACTIVITY MANAGER - VISUAL GUI")
+    print("🎮 DISCORD CUSTOM ACTIVITY MANAGER - MEME & TROLL EDITION")
     print(f"🚀 Opening dashboard in your browser: {url}")
     print("✨ Leave this open while using the app. Press Ctrl+C to exit.")
     print("=" * 60)

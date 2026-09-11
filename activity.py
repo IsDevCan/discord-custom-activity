@@ -57,6 +57,69 @@ PRESETS = {
         "details": "GTA Online",
         "state": "Cayo Perico Heist",
         "assets": {}
+    },
+    "gta6": {
+        "id": "811469787657928704",
+        "name": "Grand Theft Auto VI",
+        "details": "Playing Early Access Dev Build",
+        "state": "Vice City Heist (Mission 42)",
+        "assets": {}
+    },
+    "silksong": {
+        "id": "811469787657928704",
+        "name": "Hollow Knight: Silksong",
+        "details": "Pharloom Citadel (100% Run)",
+        "state": "Waiting Since 2019",
+        "assets": {}
+    },
+    "halflife3": {
+        "id": "811469787657928704",
+        "name": "Half-Life 3",
+        "details": "Valve Internal Beta v0.9",
+        "state": "Chapter 7: Return to Borealis",
+        "assets": {}
+    },
+    "bloodborne": {
+        "id": "811469787657928704",
+        "name": "Bloodborne PC Remaster",
+        "details": "4K 120FPS (Finally on PC)",
+        "state": "Father Gascoigne (Attempt 1)",
+        "assets": {}
+    },
+    "portal3": {
+        "id": "811469787657928704",
+        "name": "Portal 3",
+        "details": "Aperture Science Testing",
+        "state": "Chamber 47 - Still No Cake",
+        "assets": {}
+    },
+    "minecraft2": {
+        "id": "432980957394370572",
+        "name": "Minecraft 2 (Unreal Engine 5)",
+        "details": "Spherical World Mode",
+        "state": "Herobrine Encounter",
+        "assets": {}
+    },
+    "chess2": {
+        "id": "811469787657928704",
+        "name": "Chess 2: Battle Royale",
+        "details": "Ranked 100-Player Gulag",
+        "state": "Pawns Got Nerfed",
+        "assets": {}
+    },
+    "grass": {
+        "id": "811469787657928704",
+        "name": "Touching Grass Simulator 2026",
+        "details": "Tutorial: Leaving My Room",
+        "state": "Sunlight Burning My Eyes",
+        "assets": {}
+    },
+    "nitro": {
+        "id": "811469787657928704",
+        "name": "Free Discord Nitro Generator 3D",
+        "details": "Mining Free Nitro Coins",
+        "state": "100% Legit No Virus",
+        "assets": {}
     }
 }
 
@@ -256,7 +319,16 @@ def main():
             "rocket_league": "3",
             "overwatch": "4",
             "siege": "5",
-            "gta5": "6"
+            "gta5": "6",
+            "gta6": "gta6",
+            "silksong": "silksong",
+            "halflife3": "halflife3",
+            "bloodborne": "bloodborne",
+            "portal3": "portal3",
+            "minecraft2": "minecraft2",
+            "chess2": "chess2",
+            "grass": "grass",
+            "nitro": "nitro"
         }
         if args.preset:
             p = PRESETS[preset_map[args.preset]]
