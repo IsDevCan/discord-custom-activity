@@ -1,49 +1,11 @@
-#!/usr/bin/env python3
-"""
-Discord Custom Activity & Rich Presence Manager - Visual Dashboard
-Created by IsDevCan
-Zero-dependency visual UI with Meme/Unreleased game presets, Drag & Drop custom image support, and built-in logos.
-"""
-
-import os
-import sys
-import time
-import socket
-import struct
-import json
-import base64
-import webbrowser
-import threading
-import subprocess
-from http.server import HTTPServer, BaseHTTPRequestHandler
-
-from activity import DiscordIPC, PRESETS, get_discord_socket
-
-DIR = os.path.dirname(os.path.abspath(__file__))
-ASSETS_DIR = os.path.join(DIR, "assets")
-CUSTOM_IMG_PATH = os.path.join(ASSETS_DIR, "custom_icon.png")
-os.makedirs(ASSETS_DIR, exist_ok=True)
-
-CURRENT_IPC = None
-CURRENT_CONFIG = {
-    "status": "idle",
-    "name": "",
-    "details": "",
-    "state": "",
-    "timer": True,
-    "start_time": None,
-    "custom_image": None,
-    "preset": "",
-    "buttons": []
-}
-
-HTML_TEMPLATE = """<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Discord Custom Activity Manager - by IsDevCan</title>
   <style>
+    
     :root {
       --bg: #0b0e14;
       --card-bg: #151921;
@@ -58,6 +20,90 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       --text: #f2f3f5;
       --text-muted: #949ba4;
     }
+
+    /* Custom Theme Classes */
+    body.theme-cyberpunk {
+      --bg: #0d021a;
+      --card-bg: #190930;
+      --input-bg: #240c45;
+      --border: #4d1880;
+      --primary: #ff007f;
+      --primary-hover: #d6006b;
+      --accent-gold: #00f0ff;
+    }
+    body.theme-matrix {
+      --bg: #020d04;
+      --card-bg: #061f0d;
+      --input-bg: #0b2b13;
+      --border: #0e451e;
+      --primary: #00ff66;
+      --primary-hover: #00cc52;
+      --text: #e0ffe6;
+    }
+    body.theme-crimson {
+      --bg: #0f0507;
+      --card-bg: #210c11;
+      --input-bg: #30141b;
+      --border: #521c27;
+      --primary: #e63946;
+      --primary-hover: #c92a37;
+    }
+    body.theme-gold {
+      --bg: #121008;
+      --card-bg: #211c0e;
+      --input-bg: #332b17;
+      --border: #594a28;
+      --primary: #f59e0b;
+      --primary-hover: #d97706;
+    }
+    body.theme-amoled {
+      --bg: #000000;
+      --card-bg: #101010;
+      --input-bg: #181818;
+      --border: #262626;
+      --primary: #ffffff;
+      --primary-hover: #e0e0e0;
+      --text: #ffffff;
+    }
+
+    .customizer-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+
+    .theme-pills {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .theme-btn {
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--input-bg);
+      color: var(--text);
+      transition: all 0.2s;
+    }
+
+    .theme-btn:hover, .theme-btn.active {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: #fff;
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body {
       background-color: var(--bg);
@@ -393,6 +439,24 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       <p class="subtitle">Flex unreleased games like GTA 6, Silksong, Half-Life 3, or drop any custom meme image on your Discord!</p>
     </div>
 
+    
+    <!-- Local Page Customization Studio -->
+    <div class="customizer-bar">
+      <div class="theme-pills">
+        <span style="font-size: 13px; font-weight: 700; color: var(--text);">🎨 Page Theme:</span>
+        <button type="button" class="theme-btn active" onclick="setTheme('default', this)">Blurple</button>
+        <button type="button" class="theme-btn" onclick="setTheme('cyberpunk', this)">🌸 Cyberpunk</button>
+        <button type="button" class="theme-btn" onclick="setTheme('matrix', this)">🌿 Matrix</button>
+        <button type="button" class="theme-btn" onclick="setTheme('crimson', this)">🩸 Crimson</button>
+        <button type="button" class="theme-btn" onclick="setTheme('gold', this)">👑 Gold</button>
+        <button type="button" class="theme-btn" onclick="setTheme('amoled', this)">🌑 AMOLED</button>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 12px; color: var(--text-muted);">Custom Accent:</span>
+        <input type="color" id="customColorPicker" value="#5865F2" style="width: 32px; height: 32px; border: none; border-radius: 6px; cursor: pointer; background: none;" onchange="setCustomAccent(this.value)">
+      </div>
+    </div>
+
     <div class="card">
       <div class="card-title">
         <span>Activity Controls</span>
@@ -437,7 +501,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
               <option value="lol">League of Legends</option>
             </optgroup>
           </select>
+          
+          <button class="btn-dice" onclick="saveCurrentAsPreset()" style="background: var(--accent-green);" title="Save your current activity settings as a local preset!">💾 Save as My Preset</button>
           <button class="btn-dice" onclick="pickRandomMeme()" title="Pick a random troll game!">🎲 Random Troll</button>
+
         </div>
       </div>
 
@@ -826,246 +893,117 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     // Default to GTA 6 on first load!
     document.getElementById("presetSelect").value = "gta6";
     applyPreset();
+  
+    // --- LOCAL PAGE CUSTOMIZATION & THEMES ---
+    function setTheme(themeName, btn) {
+      document.body.className = '';
+      if (themeName !== 'default') {
+        document.body.classList.add('theme-' + themeName);
+      }
+      localStorage.setItem('discord_activity_theme', themeName);
+      document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+    }
+
+    function setCustomAccent(color) {
+      document.documentElement.style.setProperty('--primary', color);
+      document.documentElement.style.setProperty('--primary-hover', color);
+      localStorage.setItem('discord_activity_custom_color', color);
+    }
+
+    // --- SAVED CUSTOM PRESETS (localStorage) ---
+    function getSavedPresets() {
+      try {
+        return JSON.parse(localStorage.getItem('discord_custom_saved_presets') || '{}');
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function refreshSavedPresetsDropdown() {
+      const group = document.getElementById('savedPresetsGroup');
+      if (!group) return;
+      const saved = getSavedPresets();
+      group.innerHTML = '';
+      const keys = Object.keys(saved);
+      if (keys.length === 0) {
+        group.innerHTML = '<option disabled>(No custom presets saved yet)</option>';
+        return;
+      }
+      keys.forEach(k => {
+        const opt = document.createElement('option');
+        opt.value = 'saved_' + k;
+        opt.innerText = '⭐ ' + saved[k].name;
+        group.appendChild(opt);
+      });
+    }
+
+    function saveCurrentAsPreset() {
+      const name = document.getElementById('gameName').value.trim();
+      const details = document.getElementById('gameDetails').value.trim();
+      const state = document.getElementById('gameState').value.trim();
+      if (!name) {
+        alert('Please enter a Game or Activity title first!');
+        return;
+      }
+      const presetName = prompt('Enter a name for this custom preset:', name);
+      if (!presetName) return;
+
+      const saved = getSavedPresets();
+      saved[presetName] = {
+        name,
+        details,
+        state,
+        image: currentCustomImage
+      };
+      localStorage.setItem('discord_custom_saved_presets', JSON.stringify(saved));
+      refreshSavedPresetsDropdown();
+      alert(`✅ Preset "${presetName}" saved! You can now pick it anytime from the top of the dropdown.`);
+    }
+
+    // Load saved settings on startup
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('discord_activity_theme') || 'default';
+      const btns = document.querySelectorAll('.theme-btn');
+      btns.forEach(b => {
+        if (b.innerText.toLowerCase().includes(savedTheme) || (savedTheme === 'default' && b.innerText === 'Blurple')) {
+          setTheme(savedTheme, b);
+        }
+      });
+      const customColor = localStorage.getItem('discord_activity_custom_color');
+      if (customColor) {
+        setCustomAccent(customColor);
+        const picker = document.getElementById('customColorPicker');
+        if (picker) picker.value = customColor;
+      }
+      refreshSavedPresetsDropdown();
+    });
+
+    // Update applyPreset to support saved custom presets
+    const originalApplyPreset = applyPreset;
+    applyPreset = function() {
+      const key = document.getElementById('presetSelect').value;
+      if (key && key.startsWith('saved_')) {
+        const presetName = key.replace('saved_', '');
+        const saved = getSavedPresets()[presetName];
+        if (saved) {
+          document.getElementById('gameName').value = saved.name || '';
+          document.getElementById('gameDetails').value = saved.details || '';
+          document.getElementById('gameState').value = saved.state || '';
+          if (saved.image) {
+            currentCustomImage = saved.image;
+            setLogoImage(saved.image);
+            document.getElementById('previewBar').style.display = 'flex';
+            document.getElementById('customThumb').src = saved.image;
+            document.getElementById('customFileName').innerText = 'Custom Preset Image';
+          }
+          updatePreview();
+          return;
+        }
+      }
+      originalApplyPreset();
+    };
+
   </script>
 </body>
 </html>
-"""
-
-SOCKET_LOCK = threading.Lock()
-
-class WebHandler(BaseHTTPRequestHandler):
-    def log_message(self, format, *args):
-        pass
-
-    def send_json(self, data, status=200):
-        body = json.dumps(data).encode("utf-8")
-        self.send_response(status)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Content-Length", str(len(body)))
-        self.end_headers()
-        self.wfile.write(body)
-
-    def do_GET(self):
-        if self.path in ["/", "", "/index.html"]:
-            html_file = os.path.join(DIR, "index.html")
-            if os.path.exists(html_file):
-                with open(html_file, "r", encoding="utf-8") as f:
-                    content = f.read()
-            else:
-                content = HTML_TEMPLATE
-            body = content.encode("utf-8")
-            self.send_response(200)
-            self.send_header("Content-Type", "text/html; charset=utf-8")
-            self.send_header("Content-Length", str(len(body)))
-            self.end_headers()
-            self.wfile.write(body)
-        elif self.path == "/api/status":
-            self.send_json(CURRENT_CONFIG)
-        elif self.path == "/assets/custom_icon.png":
-            if os.path.exists(CUSTOM_IMG_PATH):
-                with open(CUSTOM_IMG_PATH, "rb") as f:
-                    data = f.read()
-                self.send_response(200)
-                self.send_header("Content-Type", "image/png")
-                self.send_header("Content-Length", str(len(data)))
-                self.end_headers()
-                self.wfile.write(data)
-            else:
-                self.send_response(404)
-                self.end_headers()
-        else:
-            self.send_response(404)
-            self.end_headers()
-
-    def do_POST(self):
-        global CURRENT_IPC, CURRENT_CONFIG
-        content_len = int(self.headers.get("Content-Length", 0))
-        post_data = self.rfile.read(content_len)
-        try:
-            body = json.loads(post_data.decode("utf-8"))
-        except Exception:
-            body = {}
-
-        if self.path == "/api/upload_image":
-            img_b64 = body.get("image", "")
-            filename = body.get("filename", "custom.png")
-            ext = os.path.splitext(filename)[1].lower()
-            if ext not in [".png", ".jpg", ".jpeg", ".webp", ".gif"]:
-                ext = ".png"
-            if "," in img_b64:
-                img_b64 = img_b64.split(",", 1)[1]
-            try:
-                data = base64.b64decode(img_b64)
-                unique_name = f"user_img_{int(time.time())}{ext}"
-                target_path = os.path.join(ASSETS_DIR, unique_name)
-                with open(target_path, "wb") as f:
-                    f.write(data)
-                
-                # Auto push to repo to get public Discord-accessible link
-                subprocess.run(["git", "add", target_path], cwd=DIR, check=True)
-                subprocess.run([
-                    "git", "commit", "-m", f"Auto-publish custom image {unique_name}",
-                    "--author=IsDevCan <191389591+IsDevCan@users.noreply.github.com>"
-                ], cwd=DIR, check=True)
-                subprocess.run(["git", "push", "origin", "main"], cwd=DIR, timeout=8, check=True)
-                
-                public_url = f"https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/{unique_name}"
-                self.send_json({"success": True, "url": public_url})
-            except Exception as e:
-                # Fallback to user_custom.png
-                public_url = "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/user_custom.png"
-                self.send_json({"success": True, "url": public_url})
-            return
-
-        elif self.path == "/api/start":
-            name = body.get("name", "")
-            details = body.get("details", "")
-            state = body.get("state", "")
-            timer = body.get("timer", True)
-            buttons = body.get("buttons", [])
-            custom_image = body.get("custom_image")
-
-            # Auto-handle base64 or local custom images
-            if custom_image and isinstance(custom_image, str) and custom_image.startswith("data:image"):
-                try:
-                    img_b64 = custom_image.split(",", 1)[1] if "," in custom_image else custom_image
-                    data = base64.b64decode(img_b64)
-                    unique_name = f"user_img_{int(time.time())}.png"
-                    target_path = os.path.join(ASSETS_DIR, unique_name)
-                    with open(target_path, "wb") as f:
-                        f.write(data)
-                    subprocess.run(["git", "add", target_path], cwd=DIR, check=True)
-                    subprocess.run([
-                        "git", "commit", "-m", f"Auto-publish custom image {unique_name}",
-                        "--author=IsDevCan <191389591+IsDevCan@users.noreply.github.com>"
-                    ], cwd=DIR, check=True)
-                    subprocess.run(["git", "push", "origin", "main"], cwd=DIR, timeout=8, check=True)
-                    custom_image = f"https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/{unique_name}"
-                except Exception:
-                    custom_image = "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/user_custom.png"
-            elif custom_image and isinstance(custom_image, str) and (custom_image.startswith("/assets/") or custom_image == "custom"):
-                custom_image = "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/user_custom.png"
-
-            client_id = "811469787657928704"
-            # Match registered preset ID if available
-            for k, p in PRESETS.items():
-                if p.get("name", "").lower() == name.lower():
-                    client_id = p["id"]
-                    break
-
-            # Build assets dictionary
-            assets = {}
-            if custom_image and isinstance(custom_image, str) and (custom_image.startswith("http://") or custom_image.startswith("https://")):
-                assets = {"large_image": custom_image, "large_text": name}
-            else:
-                for k, p in PRESETS.items():
-                    if p.get("name", "").lower() == name.lower():
-                        if p.get("assets"):
-                            assets = p["assets"]
-                        break
-
-            with SOCKET_LOCK:
-                # 1. Reuse existing open socket if alive
-                if CURRENT_IPC and CURRENT_IPC.sock:
-                    start_time = int(time.time()) if timer else None
-                    ok = CURRENT_IPC.set_activity(
-                        name=name,
-                        details=details,
-                        state=state,
-                        start_timestamp=start_time,
-                        assets=assets if assets else None,
-                        buttons=buttons if buttons else None
-                    )
-                    if ok:
-                        CURRENT_CONFIG = {
-                            "status": "active",
-                            "name": name,
-                            "details": details,
-                            "state": state,
-                            "timer": timer,
-                            "start_time": start_time,
-                            "custom_image": custom_image,
-                            "buttons": buttons
-                        }
-                        self.send_json({"success": True})
-                        return
-
-                # 2. If no open socket or update failed, clean and reconnect
-                if CURRENT_IPC:
-                    try:
-                        CURRENT_IPC.close()
-                    except Exception:
-                        pass
-                    CURRENT_IPC = None
-                    time.sleep(1.2)
-
-                ipc = DiscordIPC(client_id)
-                ok, msg = ipc.connect()
-                if not ok:
-                    time.sleep(1.2)
-                    ok, msg = ipc.connect()
-                    if not ok:
-                        self.send_json({"success": False, "error": msg})
-                        return
-
-                start_time = int(time.time()) if timer else None
-                ok = ipc.set_activity(
-                    name=name,
-                    details=details,
-                    state=state,
-                    start_timestamp=start_time,
-                    assets=assets if assets else None,
-                    buttons=buttons if buttons else None
-                )
-
-                if ok:
-                    CURRENT_IPC = ipc
-                    CURRENT_CONFIG = {
-                        "status": "active",
-                        "name": name,
-                        "details": details,
-                        "state": state,
-                        "timer": timer,
-                        "start_time": start_time,
-                        "custom_image": custom_image,
-                        "buttons": buttons
-                    }
-                    self.send_json({"success": True})
-                else:
-                    self.send_json({"success": False, "error": "Discord rejected activity payload."})
-
-        elif self.path == "/api/stop":
-            with SOCKET_LOCK:
-                if CURRENT_IPC:
-                    try:
-                        CURRENT_IPC.clear_activity()
-                    except Exception:
-                        pass
-                CURRENT_CONFIG["status"] = "idle"
-                self.send_json({"success": True})
-
-def main():
-    port = 5255
-    server_address = ("127.0.0.1", port)
-    httpd = HTTPServer(server_address, WebHandler)
-    url = f"http://localhost:{port}"
-
-    print("=" * 60)
-    print("🎮 DISCORD CUSTOM ACTIVITY MANAGER - MEME & TROLL EDITION")
-    print(f"🚀 Opening dashboard in your browser: {url}")
-    print("✨ Leave this open while using the app. Press Ctrl+C to exit.")
-    print("=" * 60)
-
-    try:
-        webbrowser.open(url)
-    except Exception:
-        pass
-
-    try:
-        httpd.serve_forever()
-    except KeyboardInterrupt:
-        print("\nStopping server...")
-        httpd.server_close()
-
-if __name__ == "__main__":
-    main()

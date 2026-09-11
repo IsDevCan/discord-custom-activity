@@ -72,6 +72,17 @@ You can put **any picture or meme** as your game icon:
 
 ---
 
+## 🎨 Local Page Customization Studio (`index.html`)
+
+You can fully customize the appearance and behavior of your dashboard:
+
+- **Built-in Color Themes:** Switch on the fly between **Blurple**, **🌸 Cyberpunk**, **🌿 Matrix**, **🩸 Crimson**, **👑 Gold**, and **🌑 AMOLED True Dark**.
+- **Custom Color Picker:** Pick any custom accent color from the color wheel.
+- **💾 Save Your Own Custom Presets:** Configure any game name, details, state, and image, then click **💾 Save as My Preset**. It will stay saved in your dropdown forever so you can re-use it with 1 click!
+- **✏️ Fully Editable Source File:** The webpage is powered by **`index.html`** right in your folder. Open it in VS Code, Sublime, TextEdit, or Notepad to tweak CSS styles, add buttons, or rebrand anything. Any changes show up immediately upon refreshing the page!
+
+---
+
 ## 💻 Terminal / Command Line Mode (Optional)
 
 If you prefer using the terminal:
