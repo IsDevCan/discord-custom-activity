@@ -63,63 +63,90 @@ PRESETS = {
         "name": "Grand Theft Auto VI",
         "details": "Playing Early Access Dev Build",
         "state": "Vice City Heist (Mission 42)",
-        "assets": {}
+        "assets": {
+            "large_image": "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/icons/gta6.png",
+            "large_text": "Grand Theft Auto VI"
+        }
     },
     "silksong": {
         "id": "811469787657928704",
         "name": "Hollow Knight: Silksong",
         "details": "Pharloom Citadel (100% Run)",
         "state": "Waiting Since 2019",
-        "assets": {}
+        "assets": {
+            "large_image": "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/icons/silksong.png",
+            "large_text": "Hollow Knight: Silksong"
+        }
     },
     "halflife3": {
         "id": "811469787657928704",
         "name": "Half-Life 3",
         "details": "Valve Internal Beta v0.9",
         "state": "Chapter 7: Return to Borealis",
-        "assets": {}
+        "assets": {
+            "large_image": "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/icons/halflife3.png",
+            "large_text": "Half-Life 3"
+        }
     },
     "bloodborne": {
         "id": "811469787657928704",
         "name": "Bloodborne PC Remaster",
         "details": "4K 120FPS (Finally on PC)",
         "state": "Father Gascoigne (Attempt 1)",
-        "assets": {}
+        "assets": {
+            "large_image": "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/icons/bloodborne_pc.png",
+            "large_text": "Bloodborne PC Remaster"
+        }
     },
     "portal3": {
         "id": "811469787657928704",
         "name": "Portal 3",
         "details": "Aperture Science Testing",
         "state": "Chamber 47 - Still No Cake",
-        "assets": {}
+        "assets": {
+            "large_image": "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/icons/portal3.png",
+            "large_text": "Portal 3"
+        }
     },
     "minecraft2": {
         "id": "432980957394370572",
         "name": "Minecraft 2 (Unreal Engine 5)",
         "details": "Spherical World Mode",
         "state": "Herobrine Encounter",
-        "assets": {}
+        "assets": {
+            "large_image": "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/icons/minecraft2.png",
+            "large_text": "Minecraft 2 (UE5)"
+        }
     },
     "chess2": {
         "id": "811469787657928704",
         "name": "Chess 2: Battle Royale",
         "details": "Ranked 100-Player Gulag",
         "state": "Pawns Got Nerfed",
-        "assets": {}
+        "assets": {
+            "large_image": "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/icons/chess2.png",
+            "large_text": "Chess 2"
+        }
     },
     "grass": {
         "id": "811469787657928704",
         "name": "Touching Grass Simulator 2026",
         "details": "Tutorial: Leaving My Room",
         "state": "Sunlight Burning My Eyes",
-        "assets": {}
+        "assets": {
+            "large_image": "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/icons/touching_grass.png",
+            "large_text": "Touching Grass"
+        }
     },
     "nitro": {
         "id": "811469787657928704",
         "name": "Free Discord Nitro Generator 3D",
         "details": "Mining Free Nitro Coins",
         "state": "100% Legit No Virus",
-        "assets": {}
+        "assets": {
+            "large_image": "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/icons/nitro_generator.png",
+            "large_text": "Free Nitro Generator"
+        }
     }
 }
 

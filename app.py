@@ -456,6 +456,14 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           <span style="font-size: 13px;" id="customFileName">Custom image loaded</span>
           <button class="btn-remove-img" onclick="removeCustomImage()">Remove</button>
         </div>
+        <div id="localImageNotice" style="display: none; margin-top: 8px; padding: 10px 14px; background: rgba(88, 101, 242, 0.12); border: 1px solid rgba(88, 101, 242, 0.35); border-radius: 8px; font-size: 13px; line-height: 1.4; color: #dbdee1;">
+          <strong>💡 Loaded in local preview!</strong> To display on your Discord profile, Discord requires a web link.<br>
+          <span style="color: #949ba4;">👉 <strong>Fastest trick (5 sec):</strong> Drop this image into any Discord chat/DM ➔ Right-click ➔ <strong>Copy Link</strong> ➔ click <strong>📋 Paste Link</strong> below!</span>
+        </div>
+        <div style="display: flex; gap: 8px; margin-top: 8px;">
+          <input type="text" id="imageUrl" placeholder="🔗 Paste Image URL (e.g. from Discord, Imgur, Tenor, Web: https://...)" oninput="handleImageUrlInput()" style="flex: 1;">
+          <button type="button" class="btn-dice" style="padding: 0 14px; white-space: nowrap;" onclick="pasteClipboardUrl()" title="Paste image link from clipboard">📋 Paste Link</button>
+        </div>
       </div>
 
       <div class="form-group">
@@ -620,6 +628,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       slot.innerHTML = `<img src="${src}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" alt="Logo">`;
     }
 
+    // Prevent browser from opening files dragged onto window
+    window.addEventListener("dragover", (e) => e.preventDefault(), false);
+    window.addEventListener("drop", (e) => e.preventDefault(), false);
+
     // Drag & Drop Handling
     const dropZone = document.getElementById("dropZone");
 
@@ -638,6 +650,17 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     });
 
     dropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropZone.classList.remove("dragover");
+
+      // Check if an image URL was dragged (e.g. directly from Discord or browser)
+      const droppedUrl = e.dataTransfer.getData("text/uri-list") || e.dataTransfer.getData("URL") || e.dataTransfer.getData("text/plain");
+      if (droppedUrl && (droppedUrl.startsWith("http://") || droppedUrl.startsWith("https://"))) {
+        document.getElementById("imageUrl").value = droppedUrl.trim();
+        handleImageUrlInput();
+        return;
+      }
+
       const files = e.dataTransfer.files;
       if (files.length > 0) {
         processImageFile(files[0]);
@@ -647,6 +670,37 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     function handleFileSelect(e) {
       if (e.target.files.length > 0) {
         processImageFile(e.target.files[0]);
+      }
+    }
+
+    function handleImageUrlInput() {
+      const url = document.getElementById("imageUrl").value.trim();
+      if (url && (url.startsWith("http://") || url.startsWith("https://"))) {
+        currentCustomImage = url;
+        setLogoImage(url);
+        document.getElementById("previewBar").style.display = "flex";
+        document.getElementById("customThumb").src = url;
+        document.getElementById("customFileName").innerText = "Image URL Linked";
+        const notice = document.getElementById("localImageNotice");
+        if (notice) notice.style.display = "none";
+      }
+    }
+
+    async function pasteClipboardUrl() {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text && (text.startsWith("http://") || text.startsWith("https://"))) {
+          document.getElementById("imageUrl").value = text.trim();
+          handleImageUrlInput();
+        } else {
+          alert("Please copy a valid image link first (starting with https://)!");
+        }
+      } catch (err) {
+        const manual = prompt("Paste your Image URL (https://...):");
+        if (manual && (manual.startsWith("http://") || manual.startsWith("https://"))) {
+          document.getElementById("imageUrl").value = manual.trim();
+          handleImageUrlInput();
+        }
       }
     }
 
@@ -666,6 +720,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         document.getElementById("customThumb").src = base64Data;
         document.getElementById("customFileName").innerText = file.name + " (" + Math.round(file.size / 1024) + " KB)";
 
+        // Show helpful tip explaining Discord needs a public link
+        const notice = document.getElementById("localImageNotice");
+        if (notice) notice.style.display = "block";
+
         // Upload to server
         fetch("/api/upload_image", {
           method: "POST",
@@ -680,6 +738,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       currentCustomImage = null;
       document.getElementById("previewBar").style.display = "none";
       document.getElementById("fileInput").value = "";
+      document.getElementById("imageUrl").value = "";
+      const notice = document.getElementById("localImageNotice");
+      if (notice) notice.style.display = "none";
       const presetKey = document.getElementById("presetSelect").value;
       if (presetKey && GAME_SVGS[presetKey]) {
         setLogoSvg(presetKey);
@@ -835,6 +896,17 @@ class WebHandler(BaseHTTPRequestHandler):
                     client_id = p["id"]
                     break
 
+            # Build assets dictionary
+            assets = {}
+            if custom_image and isinstance(custom_image, str) and (custom_image.startswith("http://") or custom_image.startswith("https://")):
+                assets = {"large_image": custom_image, "large_text": name}
+            else:
+                for k, p in PRESETS.items():
+                    if p.get("name", "").lower() == name.lower():
+                        if p.get("assets"):
+                            assets = p["assets"]
+                        break
+
             with SOCKET_LOCK:
                 # 1. Reuse existing open socket if alive
                 if CURRENT_IPC and CURRENT_IPC.sock:
@@ -844,6 +916,7 @@ class WebHandler(BaseHTTPRequestHandler):
                         details=details,
                         state=state,
                         start_timestamp=start_time,
+                        assets=assets if assets else None,
                         buttons=buttons if buttons else None
                     )
                     if ok:
@@ -884,6 +957,7 @@ class WebHandler(BaseHTTPRequestHandler):
                     details=details,
                     state=state,
                     start_timestamp=start_time,
+                    assets=assets if assets else None,
                     buttons=buttons if buttons else None
                 )
 

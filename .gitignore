@@ -2,3 +2,4 @@
 *.pid
 __pycache__/
 .DS_Store
+assets/custom_icon.png
