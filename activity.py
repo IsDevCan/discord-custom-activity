@@ -64,7 +64,7 @@ PRESETS = {
         "details": "Playing Early Access Dev Build",
         "state": "Vice City Heist (Mission 42)",
         "assets": {
-            "large_image": "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/icons/gta6.png?v=2",
+            "large_image": "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/icons/gta6_logo.png",
             "large_text": "Grand Theft Auto VI"
         }
     },
@@ -74,7 +74,7 @@ PRESETS = {
         "details": "Pharloom Citadel (100% Run)",
         "state": "Waiting Since 2019",
         "assets": {
-            "large_image": "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/icons/silksong.png?v=2",
+            "large_image": "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/icons/silksong_logo.png",
             "large_text": "Hollow Knight: Silksong"
         }
     },
@@ -84,7 +84,7 @@ PRESETS = {
         "details": "Valve Internal Beta v0.9",
         "state": "Chapter 7: Return to Borealis",
         "assets": {
-            "large_image": "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/icons/halflife3.png?v=2",
+            "large_image": "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/icons/hl3_logo.png",
             "large_text": "Half-Life 3"
         }
     },
@@ -94,7 +94,7 @@ PRESETS = {
         "details": "4K 120FPS (Finally on PC)",
         "state": "Father Gascoigne (Attempt 1)",
         "assets": {
-            "large_image": "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/icons/bloodborne_pc.png?v=2",
+            "large_image": "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/icons/bloodborne_logo.png",
             "large_text": "Bloodborne PC Remaster"
         }
     },
@@ -104,7 +104,7 @@ PRESETS = {
         "details": "Aperture Science Testing",
         "state": "Chamber 47 - Still No Cake",
         "assets": {
-            "large_image": "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/icons/portal3.png?v=2",
+            "large_image": "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/icons/portal3_logo.png",
             "large_text": "Portal 3"
         }
     },
@@ -114,7 +114,7 @@ PRESETS = {
         "details": "Spherical World Mode",
         "state": "Herobrine Encounter",
         "assets": {
-            "large_image": "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/icons/minecraft2.png?v=2",
+            "large_image": "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/icons/minecraft2_logo.png",
             "large_text": "Minecraft 2 (UE5)"
         }
     },
@@ -124,7 +124,7 @@ PRESETS = {
         "details": "Ranked 100-Player Gulag",
         "state": "Pawns Got Nerfed",
         "assets": {
-            "large_image": "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/icons/chess2.png?v=2",
+            "large_image": "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/icons/chess2_logo.png",
             "large_text": "Chess 2"
         }
     },
@@ -134,7 +134,7 @@ PRESETS = {
         "details": "Tutorial: Leaving My Room",
         "state": "Sunlight Burning My Eyes",
         "assets": {
-            "large_image": "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/icons/touching_grass.png?v=2",
+            "large_image": "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/icons/grass_logo.png",
             "large_text": "Touching Grass"
         }
     },
@@ -144,7 +144,7 @@ PRESETS = {
         "details": "Mining Free Nitro Coins",
         "state": "100% Legit No Virus",
         "assets": {
-            "large_image": "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/icons/nitro_generator.png?v=2",
+            "large_image": "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/icons/nitro_logo.png",
             "large_text": "Free Nitro Generator"
         }
     }
