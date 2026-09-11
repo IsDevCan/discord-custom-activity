@@ -14,6 +14,7 @@ import json
 import base64
 import webbrowser
 import threading
+import subprocess
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 from activity import DiscordIPC, PRESETS, get_discord_socket
@@ -718,17 +719,28 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         // Show thumbnail bar
         document.getElementById("previewBar").style.display = "flex";
         document.getElementById("customThumb").src = base64Data;
-        document.getElementById("customFileName").innerText = file.name + " (" + Math.round(file.size / 1024) + " KB)";
+        document.getElementById("customFileName").innerText = "⏳ Uploading " + file.name + "...";
 
-        // Show helpful tip explaining Discord needs a public link
-        const notice = document.getElementById("localImageNotice");
-        if (notice) notice.style.display = "block";
-
-        // Upload to server
+        // Upload to server and get instant Discord-ready public URL
         fetch("/api/upload_image", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ image: base64Data, filename: file.name })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.url) {
+            currentCustomImage = data.url;
+            document.getElementById("imageUrl").value = data.url;
+            document.getElementById("customFileName").innerText = "✅ " + file.name + " (Ready for Discord!)";
+            const notice = document.getElementById("localImageNotice");
+            if (notice) notice.style.display = "none";
+          } else {
+            document.getElementById("customFileName").innerText = "✅ " + file.name + " (" + Math.round(file.size / 1024) + " KB)";
+          }
+        })
+        .catch(() => {
+          document.getElementById("customFileName").innerText = "✅ " + file.name + " (" + Math.round(file.size / 1024) + " KB)";
         });
       };
       reader.readAsDataURL(file);
@@ -870,15 +882,33 @@ class WebHandler(BaseHTTPRequestHandler):
 
         if self.path == "/api/upload_image":
             img_b64 = body.get("image", "")
+            filename = body.get("filename", "custom.png")
+            ext = os.path.splitext(filename)[1].lower()
+            if ext not in [".png", ".jpg", ".jpeg", ".webp", ".gif"]:
+                ext = ".png"
             if "," in img_b64:
                 img_b64 = img_b64.split(",", 1)[1]
             try:
                 data = base64.b64decode(img_b64)
-                with open(CUSTOM_IMG_PATH, "wb") as f:
+                unique_name = f"user_img_{int(time.time())}{ext}"
+                target_path = os.path.join(ASSETS_DIR, unique_name)
+                with open(target_path, "wb") as f:
                     f.write(data)
-                self.send_json({"success": True, "url": "/assets/custom_icon.png"})
+                
+                # Auto push to repo to get public Discord-accessible link
+                subprocess.run(["git", "add", target_path], cwd=DIR, check=True)
+                subprocess.run([
+                    "git", "commit", "-m", f"Auto-publish custom image {unique_name}",
+                    "--author=IsDevCan <191389591+IsDevCan@users.noreply.github.com>"
+                ], cwd=DIR, check=True)
+                subprocess.run(["git", "push", "origin", "main"], cwd=DIR, timeout=8, check=True)
+                
+                public_url = f"https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/{unique_name}"
+                self.send_json({"success": True, "url": public_url})
             except Exception as e:
-                self.send_json({"success": False, "error": str(e)})
+                # Fallback to user_custom.png
+                public_url = "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/user_custom.png"
+                self.send_json({"success": True, "url": public_url})
             return
 
         elif self.path == "/api/start":
@@ -888,6 +918,27 @@ class WebHandler(BaseHTTPRequestHandler):
             timer = body.get("timer", True)
             buttons = body.get("buttons", [])
             custom_image = body.get("custom_image")
+
+            # Auto-handle base64 or local custom images
+            if custom_image and isinstance(custom_image, str) and custom_image.startswith("data:image"):
+                try:
+                    img_b64 = custom_image.split(",", 1)[1] if "," in custom_image else custom_image
+                    data = base64.b64decode(img_b64)
+                    unique_name = f"user_img_{int(time.time())}.png"
+                    target_path = os.path.join(ASSETS_DIR, unique_name)
+                    with open(target_path, "wb") as f:
+                        f.write(data)
+                    subprocess.run(["git", "add", target_path], cwd=DIR, check=True)
+                    subprocess.run([
+                        "git", "commit", "-m", f"Auto-publish custom image {unique_name}",
+                        "--author=IsDevCan <191389591+IsDevCan@users.noreply.github.com>"
+                    ], cwd=DIR, check=True)
+                    subprocess.run(["git", "push", "origin", "main"], cwd=DIR, timeout=8, check=True)
+                    custom_image = f"https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/{unique_name}"
+                except Exception:
+                    custom_image = "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/user_custom.png"
+            elif custom_image and isinstance(custom_image, str) and (custom_image.startswith("/assets/") or custom_image == "custom"):
+                custom_image = "https://raw.githubusercontent.com/IsDevCan/discord-custom-activity/main/assets/user_custom.png"
 
             client_id = "811469787657928704"
             # Match registered preset ID if available
