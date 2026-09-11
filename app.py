@@ -758,6 +758,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 </html>
 """
 
+SOCKET_LOCK = threading.Lock()
+
 class WebHandler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
         pass
@@ -826,88 +828,96 @@ class WebHandler(BaseHTTPRequestHandler):
             buttons = body.get("buttons", [])
             custom_image = body.get("custom_image")
 
-            # Fallback client ID
             client_id = "811469787657928704"
-            assets = {}
+            # Match registered preset ID if available
             for k, p in PRESETS.items():
-                if p["name"].lower() == name.lower():
+                if p.get("name", "").lower() == name.lower():
                     client_id = p["id"]
-                    if p.get("assets"):
-                        assets = p["assets"]
                     break
 
-            if CURRENT_IPC:
-                try:
-                    CURRENT_IPC.close()
-                except Exception:
-                    pass
+            with SOCKET_LOCK:
+                # 1. Reuse existing open socket if alive
+                if CURRENT_IPC and CURRENT_IPC.sock:
+                    start_time = int(time.time()) if timer else None
+                    ok = CURRENT_IPC.set_activity(
+                        name=name,
+                        details=details,
+                        state=state,
+                        start_timestamp=start_time,
+                        buttons=buttons if buttons else None
+                    )
+                    if ok:
+                        CURRENT_CONFIG = {
+                            "status": "active",
+                            "name": name,
+                            "details": details,
+                            "state": state,
+                            "timer": timer,
+                            "start_time": start_time,
+                            "custom_image": custom_image,
+                            "buttons": buttons
+                        }
+                        self.send_json({"success": True})
+                        return
 
-            ipc = DiscordIPC(client_id)
-            ok, msg = ipc.connect()
-            if not ok:
-                self.send_json({"success": False, "error": msg})
-                return
+                # 2. If no open socket or update failed, clean and reconnect
+                if CURRENT_IPC:
+                    try:
+                        CURRENT_IPC.close()
+                    except Exception:
+                        pass
+                    CURRENT_IPC = None
+                    time.sleep(1.2)
 
-            start_time = int(time.time()) if timer else None
-            ok = ipc.set_activity(
-                name=name,
-                details=details,
-                state=state,
-                start_timestamp=start_time,
-                assets=assets if assets else None,
-                buttons=buttons if buttons else None
-            )
+                ipc = DiscordIPC(client_id)
+                ok, msg = ipc.connect()
+                if not ok:
+                    time.sleep(1.2)
+                    ok, msg = ipc.connect()
+                    if not ok:
+                        self.send_json({"success": False, "error": msg})
+                        return
 
-            if ok:
-                CURRENT_IPC = ipc
-                CURRENT_CONFIG = {
-                    "status": "active",
-                    "name": name,
-                    "details": details,
-                    "state": state,
-                    "timer": timer,
-                    "start_time": start_time,
-                    "custom_image": custom_image,
-                    "buttons": buttons
-                }
-                self.send_json({"success": True})
-            else:
-                self.send_json({"success": False, "error": "Failed to set Discord activity."})
+                start_time = int(time.time()) if timer else None
+                ok = ipc.set_activity(
+                    name=name,
+                    details=details,
+                    state=state,
+                    start_timestamp=start_time,
+                    buttons=buttons if buttons else None
+                )
+
+                if ok:
+                    CURRENT_IPC = ipc
+                    CURRENT_CONFIG = {
+                        "status": "active",
+                        "name": name,
+                        "details": details,
+                        "state": state,
+                        "timer": timer,
+                        "start_time": start_time,
+                        "custom_image": custom_image,
+                        "buttons": buttons
+                    }
+                    self.send_json({"success": True})
+                else:
+                    self.send_json({"success": False, "error": "Discord rejected activity payload."})
 
         elif self.path == "/api/stop":
-            if CURRENT_IPC:
-                try:
-                    CURRENT_IPC.clear_activity()
-                    CURRENT_IPC.close()
-                except Exception:
-                    pass
-                CURRENT_IPC = None
-            CURRENT_CONFIG["status"] = "idle"
-            self.send_json({"success": True})
-
-def start_heartbeat():
-    global CURRENT_IPC, CURRENT_CONFIG
-    while True:
-        time.sleep(15)
-        if CURRENT_IPC and CURRENT_CONFIG.get("status") == "active":
-            try:
-                CURRENT_IPC.set_activity(
-                    name=CURRENT_CONFIG.get("name"),
-                    details=CURRENT_CONFIG.get("details"),
-                    state=CURRENT_CONFIG.get("state"),
-                    start_timestamp=CURRENT_CONFIG.get("start_time"),
-                    buttons=CURRENT_CONFIG.get("buttons")
-                )
-            except Exception:
-                pass
+            with SOCKET_LOCK:
+                if CURRENT_IPC:
+                    try:
+                        CURRENT_IPC.clear_activity()
+                    except Exception:
+                        pass
+                CURRENT_CONFIG["status"] = "idle"
+                self.send_json({"success": True})
 
 def main():
     port = 5255
     server_address = ("127.0.0.1", port)
     httpd = HTTPServer(server_address, WebHandler)
     url = f"http://localhost:{port}"
-
-    threading.Thread(target=start_heartbeat, daemon=True).start()
 
     print("=" * 60)
     print("🎮 DISCORD CUSTOM ACTIVITY MANAGER - MEME & TROLL EDITION")

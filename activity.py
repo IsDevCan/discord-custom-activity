@@ -227,6 +227,16 @@ class DiscordIPC:
                     "nonce": str(uuid.uuid4())
                 }).encode("utf-8")
                 self.sock.sendall(struct.pack("<ii", 1, len(clear)) + clear)
+                resp_hdr = self.sock.recv(8)
+                if len(resp_hdr) == 8:
+                    self.sock.recv(struct.unpack("<ii", resp_hdr)[1])
+            except Exception:
+                pass
+            try:
+                self.sock.shutdown(socket.SHUT_RDWR)
+            except Exception:
+                pass
+            try:
                 self.sock.close()
             except Exception:
                 pass
